@@ -15,6 +15,20 @@ Architect → Product Owner → Scrum Master → Developer → Code Reviewer →
 
 ---
 
+## In plain English
+
+Ask a single AI to "build my app" and it just starts typing code — no plan, no review, no tests, whatever style it feels like. **nagents gives you a whole AI _team_ instead of one coder.** A product owner writes the requirements, a scrum master breaks them into tasks, a developer writes the code to real engineering standards, a reviewer checks it, and QA tests it before anything is called "done."
+
+You describe the idea → you get **requirements, a task plan, reviewed code, and a QA report** — the whole paper trail, not just a code dump.
+
+**What you get:**
+
+- 🧠 Turns _"AI, build this"_ into _"AI **team**, build this properly."_
+- 📐 Code that follows real standards — SOLID, design patterns, clean component structure — enforced, not hoped for.
+- 🔁 Every change is reviewed and tested before it ships.
+- 🧩 Works for **any product and any stack** — it asks what you're building (mobile? web? desktop?) and adapts.
+- 🔌 Runs on **Claude Code, OpenAI Codex, Gemini, or Aider**.
+
 ## What is this?
 
 Most "AI dev team" setups hardcode a stack and a fixed pipeline. **nagents doesn't.** You describe an idea; a senior **Solution Architect** asks what you're building (mobile? web? desktop?), proposes a tech stack, and — once you agree — **researches that stack's best practices and writes them into a skill the whole team loads before coding.** Then the classic loop runs: PRD → backlog → implement → review → QA, with rework loops at every gate.
