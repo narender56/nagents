@@ -2,7 +2,7 @@
 
 # 🤖 nagents
 
-**A self-adapting software-engineering team for [Claude Code](https://claude.com/claude-code).**
+**A self-adapting software-engineering team for [Claude Code](https://claude.com/claude-code) — and any other agent CLI (Codex, Gemini, Aider).**
 
 Architect → Product Owner → Scrum Master → Developer → Code Reviewer → QA — six AI subagents that discover your platform, agree a tech stack, *learn its best practices*, then build with review and QA gates.
 
@@ -105,6 +105,18 @@ The architect runs discovery, proposes a stack, and **waits for your call**. App
 
 > "Run the nagents-pipeline workflow with args: `{ idea: 'habit-tracking app', platform: 'cross-platform mobile', stack: 'Flutter + Firebase' }`"
 
+### Option C — Any agent CLI (Codex, Gemini, Aider, …) via the tool-agnostic orchestrator
+
+nagents isn't Claude-only. The roles, skills, and memory are plain files, so a small Node runner drives the whole pipeline against **any** coding-agent CLI:
+
+```bash
+node orchestrator/run.mjs --engine codex  --idea "a habit-tracking app" --platform mobile
+node orchestrator/run.mjs --engine gemini --idea "..."
+node orchestrator/run.mjs --engine claude --idea "..." --stack "Flutter + Firebase"
+```
+
+It inlines the skills into each prompt (non-Claude tools can't auto-load them), runs every role sequentially (no file conflicts), and enforces the review/QA gates. Most other tools are single-agent — this runner *is* the orchestration they lack. See [`orchestrator/README.md`](orchestrator/README.md).
+
 ### Option B — Install as a Claude Code plugin
 
 From inside any project's Claude Code session:
@@ -124,6 +136,7 @@ nagents/
 │   ├── agents/        6 role agents
 │   ├── skills/        team-memory + stack-profile (generated) + 5 generic skills
 │   └── workflows/     nagents-pipeline.js  (automated end-to-end run)
+├── orchestrator/      tool-agnostic runner: run.mjs + engines.json (Codex, Gemini, Aider, Claude)
 ├── .claude-plugin/
 │   ├── plugin.json        plugin manifest (points at .claude/)
 │   └── marketplace.json   makes the repo directly installable

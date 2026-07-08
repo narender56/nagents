@@ -1,0 +1,35 @@
+{
+  "_comment": "Engine = how to invoke a coding-agent CLI non-interactively in the repo. The runner replaces {PROMPT} with the composed role prompt. Adjust flags to match YOUR installed CLI version. 'promptVia': 'arg' passes the prompt as an argument; 'stdin' pipes it in.",
+  "engines": {
+    "claude": {
+      "cmd": "claude",
+      "args": ["-p", "--permission-mode", "acceptEdits", "{PROMPT}"],
+      "promptVia": "arg",
+      "notes": "Claude Code headless. Use --dangerously-skip-permissions instead of acceptEdits for fully unattended runs."
+    },
+    "codex": {
+      "cmd": "codex",
+      "args": ["exec", "--full-auto", "{PROMPT}"],
+      "promptVia": "arg",
+      "notes": "OpenAI Codex CLI, non-interactive. Older versions: 'codex exec -a never --sandbox workspace-write'."
+    },
+    "gemini": {
+      "cmd": "gemini",
+      "args": ["-y", "-p", "{PROMPT}"],
+      "promptVia": "arg",
+      "notes": "Google Gemini CLI. -y auto-approves tool calls."
+    },
+    "aider": {
+      "cmd": "aider",
+      "args": ["--yes-always", "--no-auto-commits", "--message", "{PROMPT}"],
+      "promptVia": "arg",
+      "notes": "Aider edits files directly. It won't 'print' a clean verdict, so it works best for build roles; gate roles may need manual verdict entry."
+    },
+    "echo": {
+      "cmd": "bash",
+      "args": ["-c", "cat"],
+      "promptVia": "stdin",
+      "notes": "Test engine: echoes the prompt back. Use with --dry-run-ish testing to see composed prompts without a real CLI."
+    }
+  }
+}

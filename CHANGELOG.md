@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Tool-agnostic orchestrator** (`orchestrator/run.mjs` + `engines.json`): runs the
+  full pipeline against any coding-agent CLI — Claude Code, OpenAI Codex, Gemini CLI,
+  Aider. Inlines skills into prompts (non-Claude tools can't auto-load them), drives
+  roles sequentially, and enforces review/QA gates via text verdicts.
 - **Shared team memory** (`.nagents/memory/`): `project-memory.md` (conventions,
   glossary, gotchas), `decisions.md` (append-only ADR log), `state.md` (task board
   + file-ownership locks), with templates.

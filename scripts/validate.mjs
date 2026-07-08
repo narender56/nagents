@@ -94,6 +94,18 @@ if (existsSync(wf)) {
   fail('workflow: .claude/workflows/nagents-pipeline.js not found');
 }
 
+// --- orchestrator ---------------------------------------------------------
+const runner = join(root, 'orchestrator/run.mjs');
+if (existsSync(runner)) {
+  try { execFileSync(process.execPath, ['--check', runner]); pass('orchestrator: run.mjs syntax OK'); }
+  catch (e) { fail(`orchestrator: run.mjs syntax error — ${e.message}`); }
+  const eng = checkJson('orchestrator/engines.json');
+  if (eng && !eng.engines) fail('engines.json: missing "engines" object');
+  else if (eng) pass(`orchestrator: ${Object.keys(eng.engines).length} engine(s) defined`);
+} else {
+  fail('orchestrator: orchestrator/run.mjs not found');
+}
+
 // --- report ---------------------------------------------------------------
 for (const o of ok) console.log(`  ✓ ${o}`);
 if (errors.length) {
