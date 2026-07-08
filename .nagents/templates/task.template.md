@@ -5,6 +5,9 @@
 ## Description
 <what this task delivers — a thin vertical slice of value>
 
+## Files owned (to claim in memory/state.md before editing)
+- <path/a> · <path/b>  — the developer claims these in `.nagents/memory/state.md`; overlap with another task ⇒ run sequentially.
+
 ## Definition of Done
 - [ ] <criterion 1 — concrete and checkable>
 - [ ] <criterion 2>

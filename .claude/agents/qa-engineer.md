@@ -28,6 +28,7 @@ Follow `.nagents/templates/qa-report.template.md`. End with a verdict:
 
 ## Rules
 
+- Follow the **team-memory** skill: read `project-memory.md` + `state.md` first. If you add test files, claim them in `state.md` (you run after review, so the developer has already released their claims). Append gotchas you find to `project-memory.md`.
 - Test against the acceptance criteria verbatim. If a criterion is untestable, that's a defect against the **product-owner**, not something to hand-wave.
 - Never mark PASS without having actually observed the behavior. Report exactly what you ran.
 - Coverage gaps are findings too — call out criteria that lack tests.

@@ -76,7 +76,9 @@ phase('Training')
 const readiness = await agent(
   `You are the solution-architect agent. Using the agreed stack in .nagents/stack-decision.md, ` +
     `research current best practices and generate the stack profile: fill .claude/skills/stack-profile/SKILL.md and add one references/<tech>.md per technology. ` +
-    `Map the generic skills onto the stack. Then write .nagents/readiness.md and return whether the team is ready.`,
+    `Map the generic skills onto the stack. ` +
+    `Seed the shared memory from templates: create .nagents/memory/{project-memory.md, decisions.md, state.md}, write the stack conventions into project-memory.md and record the stack choice as ADR-001 in decisions.md (follow the team-memory skill). ` +
+    `Then write .nagents/readiness.md and return whether the team is ready.`,
   { label: 'architect:training', phase: 'Training', agentType: 'solution-architect', schema: READINESS_SCHEMA }
 )
 if (!readiness || !readiness.ready) {
@@ -104,53 +106,70 @@ const tasks = (plan && plan.tasks) || []
 log(`Backlog created with ${tasks.length} task(s).`)
 
 // ── Phase 6: Build each task through Dev → Review → QA with rework loops ──
+//
+// CONFLICT AVOIDANCE: this loop is SEQUENTIAL by design — one task goes fully
+// through dev → review → QA before the next begins. With a single developer
+// writing at any moment, two agents can never edit the same file, so there are
+// no write conflicts. The shared memory (.nagents/memory/state.md) still tracks
+// file ownership so the record is accurate and resumable.
+//
+// TO PARALLELIZE (advanced): the scrum-master marks disjoint tasks (non-overlapping
+// file sets) in state.md. You may run ONLY those concurrently, each developer in
+// its own git worktree, by wrapping the per-task fn below in parallel() with
+// { isolation: 'worktree' } on the dev agent — then integrate the worktrees.
+// Overlapping or dependent tasks must stay sequential.
 phase('Build')
 const MAX_REWORK = 3
+const results = []
 
-const results = await pipeline(
-  tasks,
-  async (task) => {
-    let approved = false
-    let round = 0
-    let lastFeedback = ''
-    // Dev ↔ Review loop
-    while (!approved && round < MAX_REWORK) {
-      round++
-      await agent(
-        `You are the developer agent. Implement ${task.id} — ${task.title}. ` +
-          `Read .nagents/tasks/${task.id}.md and .nagents/prd.md. Apply the stack-profile skill FIRST, then the generic skills (SOLID, design-patterns, atomic-design, component-structure, coding-standards). ` +
-          (lastFeedback ? `Address this review feedback: ${lastFeedback}` : '') +
-          ` Follow .claude/agents/developer.md.`,
-        { label: `dev:${task.id} r${round}`, phase: 'Build', agentType: 'developer' }
-      )
-      const review = await agent(
-        `You are the code-reviewer agent. Review the implementation of ${task.id} against the stack profile + generic skills. ` +
-          `Follow .claude/agents/code-reviewer.md, append to .nagents/review.md, and return your verdict.`,
-        { label: `review:${task.id} r${round}`, phase: 'Build', agentType: 'code-reviewer', schema: VERDICT_SCHEMA }
-      )
-      approved = review && review.verdict === 'APPROVED'
-      lastFeedback = review ? review.summary || '' : ''
-    }
-    if (!approved) return { task: task.id, status: 'BLOCKED_IN_REVIEW', rounds: round }
-
-    // QA gate (one rework hop back to dev on FAIL)
-    let qa = await agent(
-      `You are the qa-engineer agent. Verify ${task.id} against its acceptance criteria in .nagents/prd.md. ` +
-        `Follow .claude/agents/qa-engineer.md, write .nagents/qa-report.md, and return your verdict.`,
-      { label: `qa:${task.id}`, phase: 'Build', agentType: 'qa-engineer', schema: VERDICT_SCHEMA }
+const buildOne = async (task) => {
+  let approved = false
+  let round = 0
+  let lastFeedback = ''
+  // Dev ↔ Review loop
+  while (!approved && round < MAX_REWORK) {
+    round++
+    await agent(
+      `You are the developer agent. Implement ${task.id} — ${task.title}. ` +
+        `First read shared memory (.nagents/memory/project-memory.md, state.md) and CLAIM the files you'll edit in state.md. ` +
+        `Read .nagents/tasks/${task.id}.md and .nagents/prd.md. Apply the stack-profile skill FIRST, then the generic skills (SOLID, design-patterns, atomic-design, component-structure, coding-standards). ` +
+        (lastFeedback ? `Address this review feedback: ${lastFeedback} ` : '') +
+        `Record lasting decisions in decisions.md, release your file claims on handoff. Follow .claude/agents/developer.md.`,
+      { label: `dev:${task.id} r${round}`, phase: 'Build', agentType: 'developer' }
     )
-    if (qa && qa.verdict === 'FAIL') {
-      await agent(
-        `You are the developer agent. QA failed ${task.id}: ${qa.summary || ''}. Fix the defects. Follow .claude/agents/developer.md.`,
-        { label: `dev:${task.id} qa-fix`, phase: 'Build', agentType: 'developer' }
-      )
-      qa = await agent(
-        `You are the qa-engineer agent. Re-verify ${task.id} after the defect fix. Return your verdict.`,
-        { label: `qa:${task.id} retest`, phase: 'Build', agentType: 'qa-engineer', schema: VERDICT_SCHEMA }
-      )
-    }
-    return { task: task.id, status: qa && qa.verdict === 'PASS' ? 'DONE' : 'FAILED_QA', rounds: round }
+    const review = await agent(
+      `You are the code-reviewer agent. Review the implementation of ${task.id} against the stack profile, generic skills, and the conventions/decisions in .nagents/memory/. ` +
+        `Follow .claude/agents/code-reviewer.md, append to .nagents/review.md, and return your verdict.`,
+      { label: `review:${task.id} r${round}`, phase: 'Build', agentType: 'code-reviewer', schema: VERDICT_SCHEMA }
+    )
+    approved = review && review.verdict === 'APPROVED'
+    lastFeedback = review ? review.summary || '' : ''
   }
-)
+  if (!approved) return { task: task.id, status: 'BLOCKED_IN_REVIEW', rounds: round }
+
+  // QA gate (one rework hop back to dev on FAIL)
+  let qa = await agent(
+    `You are the qa-engineer agent. Verify ${task.id} against its acceptance criteria in .nagents/prd.md. ` +
+      `Follow .claude/agents/qa-engineer.md, write .nagents/qa-report.md, and return your verdict.`,
+    { label: `qa:${task.id}`, phase: 'Build', agentType: 'qa-engineer', schema: VERDICT_SCHEMA }
+  )
+  if (qa && qa.verdict === 'FAIL') {
+    await agent(
+      `You are the developer agent. QA failed ${task.id}: ${qa.summary || ''}. Claim files, fix the defects, release claims. Follow .claude/agents/developer.md.`,
+      { label: `dev:${task.id} qa-fix`, phase: 'Build', agentType: 'developer' }
+    )
+    qa = await agent(
+      `You are the qa-engineer agent. Re-verify ${task.id} after the defect fix. Return your verdict.`,
+      { label: `qa:${task.id} retest`, phase: 'Build', agentType: 'qa-engineer', schema: VERDICT_SCHEMA }
+    )
+  }
+  return { task: task.id, status: qa && qa.verdict === 'PASS' ? 'DONE' : 'FAILED_QA', rounds: round }
+}
+
+// Sequential: one writer at a time → zero file conflicts.
+for (const task of tasks) {
+  log(`Building ${task.id} — ${task.title}`)
+  results.push(await buildOne(task))
+}
 
 return { idea, stack: readiness.stack || chosenStack, tasks: tasks.length, results }

@@ -34,6 +34,9 @@ This is the concrete form of "getting familiar": knowledge written down once and
 - Define the high-level architecture (layers, module boundaries, folder layout) in `.nagents/stack-decision.md` so the scrum-master and developers plan within it.
 - Only when readiness is green do you hand off to the **product-owner** (for the full PRD) and **scrum-master** (for the backlog).
 
+## Shared memory
+Follow the **team-memory** skill. You seed the team brain: after the stack is agreed, write the project's **conventions** (from the stack profile) into `.nagents/memory/project-memory.md`, and record the stack + architecture choices as ADRs in `.nagents/memory/decisions.md`. This is what keeps every later agent consistent.
+
 ## Rules
 - You decide *system* architecture and stack; you do NOT implement tasks (that's the developer).
 - Never override the user's stack choice. Advise, then comply.

@@ -11,8 +11,16 @@
 6. **qa-engineer** — verifies against acceptance criteria (`.nagents/qa-report.md`)
 
 ## Skills (in `.claude/skills/`)
+- **team-memory** — the shared-memory + conflict-avoidance protocol. EVERY agent follows it.
 - **stack-profile** — the *chosen stack's* conventions. Generated per project by the architect. Empty until a stack is agreed. Loaded first by developer + reviewer; it wins over generic examples.
 - Generic quality bar: **solid-principles · design-patterns · atomic-design · component-structure · coding-standards**.
+
+## Shared memory & conflict-free execution
+The team shares one brain on disk: `.nagents/memory/` — `project-memory.md` (conventions, glossary, gotchas), `decisions.md` (append-only ADR log), `state.md` (live task board + **file ownership locks**). The full protocol is the **team-memory** skill. As orchestrator you enforce:
+- **Read before act:** every agent reads shared memory at the start of its turn.
+- **Append, never overwrite:** entries are stamped `[date · agent]`; wrong info is *superseded*, not edited — so concurrent writes don't collide.
+- **One writer per file:** a developer must *claim* files in `state.md` before editing and *release* them on handoff. Never dispatch a task whose files are claimed by another active task.
+- **Sequential by default:** run one task fully (dev → review → QA) before the next — this alone makes file conflicts impossible. Only run tasks **in parallel** when the scrum-master has marked their file sets as disjoint, and then give each developer its own git **worktree** (`isolation: 'worktree'`).
 
 ## The full flow
 ```

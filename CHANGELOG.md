@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Shared team memory** (`.nagents/memory/`): `project-memory.md` (conventions,
+  glossary, gotchas), `decisions.md` (append-only ADR log), `state.md` (task board
+  + file-ownership locks), with templates.
+- **team-memory skill** — the shared-memory + conflict-avoidance protocol every
+  agent follows: read-before-act, append-never-overwrite, claim-before-edit.
+- **Conflict-free execution**: build loop is now sequential by default (one writer
+  at a time); parallelism is opt-in for disjoint tasks via git worktrees.
+- File-ownership declarations in tasks; agents claim/release files in `state.md`.
+
 ### Planned
 - Ship artifact templates with the plugin so plugin-only installs get full orchestration
 - Ready-made stack profiles for popular stacks (React, Angular/NestJS, Flutter, Go)

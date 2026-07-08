@@ -55,10 +55,26 @@ IDEA
 
 ## The skills
 
+- **team-memory** — the shared-memory + conflict-avoidance protocol every agent follows (see below).
 - **stack-profile** — the *chosen stack's* conventions & best practices. **Generated per project** by the architect (empty until then). This is how the team "gets familiar" with a stack — knowledge written down once, loaded by every developer and reviewer. It wins over the generic examples when they conflict.
 - Always-on quality bar: **solid-principles · design-patterns · atomic-design · component-structure · coding-standards**.
 
 > **On "training":** agents can't fine-tune themselves. So "getting familiar with a stack" here means the architect **researches current best practices and writes them into the `stack-profile` skill** (one `references/<tech>.md` per technology). Concrete, inspectable, and it measurably changes what the developers produce — no hand-waving.
+
+## Shared memory & no conflicts
+
+Subagents each run in their own context — **the only thing they share is the filesystem.** nagents turns that into a real team memory and a coordination discipline (the **team-memory** skill), so the agents stay consistent and never clobber each other's work.
+
+**Common memory** lives in [`.nagents/memory/`](.nagents/memory):
+- `project-memory.md` — durable conventions, glossary, key facts, gotchas
+- `decisions.md` — append-only decision log (ADR-style) with rationale
+- `state.md` — live task board + **file ownership locks**
+
+**How conflicts are prevented:**
+- **Append, never overwrite** — every entry is stamped `[date · agent]`; outdated info is *superseded*, not rewritten, so two agents writing at once don't collide.
+- **Claim before you edit** — a developer must claim a file in `state.md` before touching it, and release it on handoff. **One writer per file, ever.**
+- **Sequential by default** — the build loop runs one task fully (dev → review → QA) before the next, so file conflicts are impossible. Parallelism is opt-in and only for tasks with *disjoint* file sets, each developer isolated in its own git **worktree**.
+- **Read before you act** — every agent reads the shared memory at the start of its turn, so nobody works on stale assumptions.
 
 ---
 
@@ -106,12 +122,12 @@ This makes the six agents and the skill pack available in that project. To also 
 nagents/
 ├── .claude/
 │   ├── agents/        6 role agents
-│   ├── skills/        stack-profile (generated) + 5 generic skills
+│   ├── skills/        team-memory + stack-profile (generated) + 5 generic skills
 │   └── workflows/     nagents-pipeline.js  (automated end-to-end run)
 ├── .claude-plugin/
 │   ├── plugin.json        plugin manifest (points at .claude/)
 │   └── marketplace.json   makes the repo directly installable
-├── .nagents/          runtime artifacts + templates/  (see its README)
+├── .nagents/          runtime artifacts + memory/ (shared brain) + templates/
 ├── .github/           issue/PR templates + CI validation
 ├── scripts/validate.mjs   structural checks (agents, skills, JSON, workflow)
 ├── CLAUDE.md          orchestrator instructions (auto-loaded)

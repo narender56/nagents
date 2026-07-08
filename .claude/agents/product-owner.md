@@ -28,6 +28,7 @@ Follow `.nagents/templates/prd.template.md` exactly. Every story needs a stable 
 
 ## Rules
 
+- Follow the **team-memory** skill: read `.nagents/memory/project-memory.md` first; append domain terms to its glossary so the whole team shares your vocabulary. Append, never overwrite.
 - No implementation detail. No tech stack, no file names, no algorithms. If you catch yourself describing HOW, stop and describe the observable outcome instead.
 - Every acceptance criterion must be falsifiable. If QA can't write a pass/fail test from it, rewrite it.
 - End your turn by telling the orchestrator: PRD is ready at `.nagents/prd.md`, hand off to the **scrum-master**.
