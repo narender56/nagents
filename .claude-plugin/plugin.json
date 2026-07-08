@@ -1,0 +1,36 @@
+{
+  "name": "nagents",
+  "displayName": "nagents",
+  "version": "0.1.0",
+  "description": "A self-adapting software-engineering team of Claude Code subagents: Architect → PO → Scrum Master → Developer → Code Reviewer → QA. Discovers your platform, agrees a tech stack, learns its best practices, then builds — enforcing SOLID, design patterns, atomic design, and component structure.",
+  "author": {
+    "name": "Narender Vaddepelly",
+    "url": "https://github.com/narender56"
+  },
+  "homepage": "https://github.com/narender56/nagents",
+  "repository": "https://github.com/narender56/nagents",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "agents",
+    "subagents",
+    "sdlc",
+    "scrum",
+    "software-team",
+    "code-review",
+    "qa",
+    "solid",
+    "design-patterns",
+    "atomic-design",
+    "orchestration"
+  ],
+  "skills": "./.claude/skills/",
+  "agents": [
+    "./.claude/agents/solution-architect.md",
+    "./.claude/agents/product-owner.md",
+    "./.claude/agents/scrum-master.md",
+    "./.claude/agents/developer.md",
+    "./.claude/agents/code-reviewer.md",
+    "./.claude/agents/qa-engineer.md"
+  ]
+}

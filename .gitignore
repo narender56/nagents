@@ -1,0 +1,23 @@
+# ── nagents runtime artifacts ────────────────────────────────────────────
+# Generated per project by the agents. NOT part of the framework — keep only
+# the templates and the folder's README under version control.
+/.nagents/*
+!/.nagents/templates/
+!/.nagents/README.md
+
+# The stack profile's references are researched & generated per project by the
+# solution-architect. The unconfigured SKILL.md is committed; its references are not.
+/.claude/skills/stack-profile/references/
+
+# ── OS / editor cruft ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# ── Node (optional tooling / CI) ─────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*

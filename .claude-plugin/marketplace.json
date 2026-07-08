@@ -1,0 +1,20 @@
+{
+  "name": "nagents",
+  "owner": {
+    "name": "Narender Vaddepelly",
+    "url": "https://github.com/narender56"
+  },
+  "plugins": [
+    {
+      "name": "nagents",
+      "source": "./",
+      "description": "A self-adapting software-engineering team of Claude Code subagents (Architect, PO, Scrum Master, Developer, Reviewer, QA) with a SOLID / design-patterns / atomic-design skill pack.",
+      "version": "0.1.0",
+      "author": { "name": "Narender Vaddepelly", "url": "https://github.com/narender56" },
+      "homepage": "https://github.com/narender56/nagents",
+      "repository": "https://github.com/narender56/nagents",
+      "license": "MIT",
+      "keywords": ["claude-code", "agents", "sdlc", "code-review", "qa", "solid"]
+    }
+  ]
+}
