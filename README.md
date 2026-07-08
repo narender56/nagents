@@ -4,7 +4,7 @@
 
 **A self-adapting software-engineering team for [Claude Code](https://claude.com/claude-code) — and any other agent CLI (Codex, Gemini, Aider).**
 
-Architect → Product Owner → Scrum Master → Developer → Code Reviewer → QA — six AI subagents that discover your platform, agree a tech stack, *learn its best practices*, then build with review and QA gates.
+Architect → Product Owner → Scrum Master → Developer → Code Reviewer → QA — six AI subagents that discover your platform, agree a tech stack, _learn its best practices_, then build with review and QA gates.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-8A63D2.svg)](https://code.claude.com/docs/en/plugins)
@@ -21,8 +21,8 @@ Most "AI dev team" setups hardcode a stack and a fixed pipeline. **nagents doesn
 
 It's built from two clean primitives, kept deliberately separate:
 
-- **Roles** = *who acts* (the six subagents)
-- **Skills** = *the knowledge they apply* (SOLID, design patterns, atomic design, component structure, coding standards, + the per-project stack profile)
+- **Roles** = _who acts_ (the six subagents)
+- **Skills** = _the knowledge they apply_ (SOLID, design patterns, atomic design, component structure, coding standards, + the per-project stack profile)
 
 Same six agents adapt to **any product and any stack** — because the stack-specific knowledge is regenerated per project, not baked in.
 
@@ -44,19 +44,19 @@ IDEA
 
 ## The team
 
-| Agent | Role | Produces |
-|---|---|---|
+| Agent                     | Role                                           | Produces                                                               |
+| ------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------- |
 | 🧭 **solution-architect** | Senior. Platform, stack, onboarding, readiness | `discovery.md`, `stack-decision.md`, `readiness.md`, the stack profile |
-| 📋 **product-owner** | The *what & why* | `prd.md` (user stories + testable acceptance criteria) |
-| 🗂️ **scrum-master** | Planning & sequencing | `backlog.md`, `tasks/` |
-| 💻 **developer** | The *how* — applies the skill pack | code + task notes |
-| 🔍 **code-reviewer** | Quality gate | `review.md` |
-| ✅ **qa-engineer** | Acceptance gate | `qa-report.md` |
+| 📋 **product-owner**      | The _what & why_                               | `prd.md` (user stories + testable acceptance criteria)                 |
+| 🗂️ **scrum-master**       | Planning & sequencing                          | `backlog.md`, `tasks/`                                                 |
+| 💻 **developer**          | The _how_ — applies the skill pack             | code + task notes                                                      |
+| 🔍 **code-reviewer**      | Quality gate                                   | `review.md`                                                            |
+| ✅ **qa-engineer**        | Acceptance gate                                | `qa-report.md`                                                         |
 
 ## The skills
 
 - **team-memory** — the shared-memory + conflict-avoidance protocol every agent follows (see below).
-- **stack-profile** — the *chosen stack's* conventions & best practices. **Generated per project** by the architect (empty until then). This is how the team "gets familiar" with a stack — knowledge written down once, loaded by every developer and reviewer. It wins over the generic examples when they conflict.
+- **stack-profile** — the _chosen stack's_ conventions & best practices. **Generated per project** by the architect (empty until then). This is how the team "gets familiar" with a stack — knowledge written down once, loaded by every developer and reviewer. It wins over the generic examples when they conflict.
 - Always-on quality bar: **solid-principles · design-patterns · atomic-design · component-structure · coding-standards**.
 
 > **On "training":** agents can't fine-tune themselves. So "getting familiar with a stack" here means the architect **researches current best practices and writes them into the `stack-profile` skill** (one `references/<tech>.md` per technology). Concrete, inspectable, and it measurably changes what the developers produce — no hand-waving.
@@ -66,14 +66,16 @@ IDEA
 Subagents each run in their own context — **the only thing they share is the filesystem.** nagents turns that into a real team memory and a coordination discipline (the **team-memory** skill), so the agents stay consistent and never clobber each other's work.
 
 **Common memory** lives in [`.nagents/memory/`](.nagents/memory):
+
 - `project-memory.md` — durable conventions, glossary, key facts, gotchas
 - `decisions.md` — append-only decision log (ADR-style) with rationale
 - `state.md` — live task board + **file ownership locks**
 
 **How conflicts are prevented:**
-- **Append, never overwrite** — every entry is stamped `[date · agent]`; outdated info is *superseded*, not rewritten, so two agents writing at once don't collide.
+
+- **Append, never overwrite** — every entry is stamped `[date · agent]`; outdated info is _superseded_, not rewritten, so two agents writing at once don't collide.
 - **Claim before you edit** — a developer must claim a file in `state.md` before touching it, and release it on handoff. **One writer per file, ever.**
-- **Sequential by default** — the build loop runs one task fully (dev → review → QA) before the next, so file conflicts are impossible. Parallelism is opt-in and only for tasks with *disjoint* file sets, each developer isolated in its own git **worktree**.
+- **Sequential by default** — the build loop runs one task fully (dev → review → QA) before the next, so file conflicts are impossible. Parallelism is opt-in and only for tasks with _disjoint_ file sets, each developer isolated in its own git **worktree**.
 - **Read before you act** — every agent reads the shared memory at the start of its turn, so nobody works on stale assumptions.
 
 ---
@@ -99,7 +101,7 @@ Then just describe an idea:
 
 > "I want to build a habit-tracking app. Kick off nagents."
 
-The architect runs discovery, proposes a stack, and **waits for your call**. Approve it or hand it your own stack; it generates the stack profile, confirms readiness, then the PO → SM → dev → review → QA loop runs. Inspect every artifact in [`.nagents/`](.nagents/README.md) between stages, or drive a single role directly: *"Have the code-reviewer look at TASK-002."*
+The architect runs discovery, proposes a stack, and **waits for your call**. Approve it or hand it your own stack; it generates the stack profile, confirms readiness, then the PO → SM → dev → review → QA loop runs. Inspect every artifact in [`.nagents/`](.nagents/README.md) between stages, or drive a single role directly: _"Have the code-reviewer look at TASK-002."_
 
 **Automated, hands-off run** (skips the interactive stack decision if you pass a stack):
 
@@ -115,7 +117,7 @@ node orchestrator/run.mjs --engine gemini --idea "..."
 node orchestrator/run.mjs --engine claude --idea "..." --stack "Flutter + Firebase"
 ```
 
-It inlines the skills into each prompt (non-Claude tools can't auto-load them), runs every role sequentially (no file conflicts), and enforces the review/QA gates. Most other tools are single-agent — this runner *is* the orchestration they lack. See [`orchestrator/README.md`](orchestrator/README.md).
+It inlines the skills into each prompt (non-Claude tools can't auto-load them), runs every role sequentially (no file conflicts), and enforces the review/QA gates. Most other tools are single-agent — this runner _is_ the orchestration they lack. See [`orchestrator/README.md`](orchestrator/README.md).
 
 ### Option B — Install as a Claude Code plugin
 
@@ -157,10 +159,10 @@ Checks that every agent and skill has valid front-matter, the plugin/marketplace
 
 ## Roadmap
 
-- [ ] Ship artifact templates *with* the plugin so plugin-only installs get full orchestration
-- [ ] Ready-made stack profiles for popular stacks (React, Angular/NestJS, Flutter, Go)
-- [ ] A `/nagents` slash command to kick off the flow
-- [ ] Example runs checked into `examples/`
+- [x] Ship artifact templates _with_ the plugin so plugin-only installs get full orchestration
+- [x] Ready-made stack profiles for popular stacks (React, Angular/NestJS, Flutter, Go)
+- [x] A `/nagents` slash command to kick off the flow
+- [x] Example runs checked into `examples/`
 
 See [CHANGELOG.md](CHANGELOG.md) for what's shipped.
 
@@ -171,5 +173,3 @@ PRs and issues welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) and the [Code 
 ## License
 
 [MIT](LICENSE) © [Narender Vaddepelly](https://github.com/narender56)
-
-<div align="center"><sub>Built with Claude Code.</sub></div>
