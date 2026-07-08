@@ -69,14 +69,23 @@ if (!engine) fail(`unknown engine "${engineName}". Available: ${Object.keys(engi
 
 // ── content loaders ─────────────────────────────────────────────────────────
 const stripFm = (t) => t.replace(/^---\n[\s\S]*?\n---\n?/, '').trim();
+function firstExisting(paths) {
+  return paths.find((p) => existsSync(p)) || null;
+}
 function roleBody(role) {
-  const p = join(ROOT, '.claude/agents', `${role}.md`);
-  if (!existsSync(p)) fail(`missing role file: ${p}`);
+  const p = firstExisting([
+    join(CWD, '.claude/agents', `${role}.md`),
+    join(ROOT, '.claude/agents', `${role}.md`),
+  ]);
+  if (!p) fail(`missing role file for ${role}`);
   return stripFm(readFileSync(p, 'utf8'));
 }
 function skillBody(name) {
-  const p = join(ROOT, '.claude/skills', name, 'SKILL.md');
-  return existsSync(p) ? stripFm(readFileSync(p, 'utf8')) : '';
+  const p = firstExisting([
+    join(CWD, '.claude/skills', name, 'SKILL.md'),
+    join(ROOT, '.claude/skills', name, 'SKILL.md'),
+  ]);
+  return p ? stripFm(readFileSync(p, 'utf8')) : '';
 }
 function readIf(rel) {
   const p = join(CWD, rel);
@@ -140,6 +149,13 @@ async function step(role, instruction) {
 }
 
 const VERDICT = (out) => (out.match(/VERDICT:\s*(APPROVED|CHANGES_REQUESTED|PASS|FAIL|READY|NOT[_ ]READY)/i) || [])[1];
+function requireFiles(files, phase) {
+  if (dryRun) return;
+  const missing = files.filter((rel) => !existsSync(join(CWD, rel)));
+  if (missing.length) {
+    fail(`${phase} did not produce required artifact(s): ${missing.join(', ')}`);
+  }
+}
 
 // ── phases ───────────────────────────────────────────────────────────────────
 function shouldRun(phase) { return PHASES.indexOf(phase) >= PHASES.indexOf(fromPhase); }
@@ -150,16 +166,25 @@ async function main() {
   if (shouldRun('discovery'))
     await step('solution-architect',
       `Run DISCOVERY. Idea: "${idea}". ${platform ? `Target platform(s): ${platform}.` : 'Infer the target platform(s) from the idea; note assumptions.'} Write .nagents/discovery.md following .nagents/templates/discovery.template.md.`);
+  if (shouldRun('discovery')) requireFiles(['.nagents/discovery.md'], 'discovery');
 
   if (shouldRun('stack'))
     await step('solution-architect',
       `Run STACK DECISION from .nagents/discovery.md. ${chosenStack
         ? `The user has chosen: "${chosenStack}". Record it as the agreed stack.`
         : `Propose 2 options with a clear recommendation, and (for this automated run) mark your recommendation as the agreed stack.`} Write .nagents/stack-decision.md following the template.`);
+  if (shouldRun('stack')) requireFiles(['.nagents/stack-decision.md'], 'stack');
 
   if (shouldRun('training')) {
     const out = await step('solution-architect',
       `Run TRAINING. Using the agreed stack in .nagents/stack-decision.md: research best practices and generate the stack profile — fill .claude/skills/stack-profile/SKILL.md and add one references/<tech>.md per technology. Seed shared memory from templates: create .nagents/memory/{project-memory.md,decisions.md,state.md}, writing conventions into project-memory.md and the stack choice as ADR-001 in decisions.md. Write .nagents/readiness.md. End your reply with a line "VERDICT: READY" or "VERDICT: NOT_READY".`);
+    requireFiles([
+      '.claude/skills/stack-profile/SKILL.md',
+      '.nagents/memory/project-memory.md',
+      '.nagents/memory/decisions.md',
+      '.nagents/memory/state.md',
+      '.nagents/readiness.md',
+    ], 'training');
     if (!dryRun && /NOT[_ ]READY/i.test(VERDICT(out) || '')) {
       log('Team NOT ready — stopping before build. Resolve gaps in .nagents/readiness.md then rerun with --from prd.');
       return;
@@ -169,14 +194,16 @@ async function main() {
   if (shouldRun('prd'))
     await step('product-owner',
       `Write the PRD at .nagents/prd.md following .claude/agents/product-owner.md and .nagents/templates/prd.template.md. Base it on .nagents/discovery.md and the idea "${idea || '(see discovery.md)'}".`);
+  if (shouldRun('prd')) requireFiles(['.nagents/prd.md'], 'prd');
 
   if (shouldRun('backlog'))
     await step('scrum-master',
       `Read .nagents/prd.md. Produce .nagents/backlog.md and one .nagents/tasks/TASK-<id>.md per task (include each task's owned files). Seed the coordination board .nagents/memory/state.md. Follow the templates.`);
+  if (shouldRun('backlog')) requireFiles(['.nagents/backlog.md', '.nagents/memory/state.md'], 'backlog');
 
   if (shouldRun('build')) await buildLoop();
 
-  log('Pipeline complete. Inspect .nagents/ for all artifacts.');
+  log(dryRun ? 'Dry-run complete. No artifacts were written.' : 'Pipeline complete. Inspect .nagents/ for all artifacts.');
 }
 
 async function buildLoop() {
@@ -184,7 +211,8 @@ async function buildLoop() {
   const tasks = existsSync(tasksDir)
     ? readdirSync(tasksDir).filter((f) => /^TASK-.*\.md$/.test(f)).sort()
     : [];
-  if (!tasks.length) { log('No tasks found in .nagents/tasks/ — did the backlog phase run?'); return; }
+  if (dryRun && !tasks.length) { log('No tasks found; dry-run stops before build prompts.'); return; }
+  if (!tasks.length) fail('No tasks found in .nagents/tasks/ — did the backlog phase run?');
   log(`Building ${tasks.length} task(s) sequentially (one writer at a time → no conflicts).`);
 
   for (const file of tasks) {
@@ -196,6 +224,7 @@ async function buildLoop() {
         `Implement ${id} (see .nagents/tasks/${file} and .nagents/prd.md). Read shared memory and CLAIM your files in .nagents/memory/state.md before editing; release them when done. Apply the stack-profile + generic skills. ${feedback ? `Address this review feedback:\n${feedback}` : ''} Record lasting decisions in .nagents/memory/decisions.md.`);
       const rev = await step('code-reviewer',
         `Review ${id} against the stack profile, generic skills, and the recorded conventions/decisions in .nagents/memory/. Append findings to .nagents/review.md. End your reply with "VERDICT: APPROVED" or "VERDICT: CHANGES_REQUESTED" followed by the blocking findings.`);
+      requireFiles(['.nagents/review.md'], `${id} review`);
       const v = (VERDICT(rev) || '').toUpperCase();
       approved = v === 'APPROVED';
       feedback = approved ? '' : rev.slice(-2000);
@@ -206,10 +235,12 @@ async function buildLoop() {
 
     let qa = await step('qa-engineer',
       `Verify ${id} against its acceptance criteria in .nagents/prd.md. Exercise the behavior, run tests. Write .nagents/qa-report.md. End with "VERDICT: PASS" or "VERDICT: FAIL" + defects.`);
+    requireFiles(['.nagents/qa-report.md'], `${id} qa`);
     let v = (VERDICT(qa) || '').toUpperCase();
     if (v === 'FAIL' && !dryRun) {
       await step('developer', `QA failed ${id}. Read .nagents/qa-report.md, claim files, fix the defects, release claims.`);
       qa = await step('qa-engineer', `Re-verify ${id} after the fix. End with "VERDICT: PASS" or "VERDICT: FAIL".`);
+      requireFiles(['.nagents/qa-report.md'], `${id} qa retest`);
       v = (VERDICT(qa) || '').toUpperCase();
     }
     log(`${id}: ${v === 'PASS' ? 'DONE ✅' : 'FAILED_QA ❌'}`);

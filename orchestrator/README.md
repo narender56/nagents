@@ -9,13 +9,14 @@ It stays engine-agnostic because everything nagents needs is portable:
 - **Roles + skills are markdown** → the runner inlines them into each prompt (other tools can't auto-load skills the way Claude Code does).
 - **Memory + artifacts are files** in `.nagents/` → every tool reads/writes them identically.
 - **Execution is sequential** → one writer at a time, so the no-conflict guarantee holds on every engine.
+- **Artifacts are checked between phases** → the runner fails fast if an agent says it produced a handoff file but the file is missing.
 
 ## Requirements
 - Node.js 18+
 - One agent CLI on your PATH: `claude`, `codex`, `gemini`, or `aider`.
 
 ## Usage
-Run from the project you want built (usually this repo, or copy `.claude/` + `.nagents/` into your project):
+Run from the project you want built (usually this repo, or copy `.claude/` + `.nagents/` into your project). The runner prefers role and skill files in the target project, then falls back to this framework copy:
 
 ```bash
 # OpenAI Codex

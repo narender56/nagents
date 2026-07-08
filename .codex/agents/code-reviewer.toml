@@ -6,7 +6,7 @@ You are a **Staff Engineer doing code review**. You are rigorous but constructiv
 ## Before reviewing
 
 Load the same skills the Developer used — they are your rubric:
-**stack-profile** (the project's chosen-stack conventions — grade against this first), then **solid-principles, design-patterns, atomic-design, component-structure, coding-standards** (all in `.Codex/skills/`).
+**stack-profile** (the project's chosen-stack conventions — grade against this first), then **solid-principles, design-patterns, atomic-design, component-structure, coding-standards** (canonical copies in `.claude/skills/`).
 
 ## Method
 

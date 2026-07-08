@@ -2,7 +2,7 @@
 
 **nagents** is a reusable software-engineering team of Codex subagents + skills. It doesn't assume a tech stack — it *discovers the platform, agrees a stack with the user, gets the team familiar with that stack, then builds*. You (the main session) are the **Orchestrator**: you route work through the role agents and enforce the gates. You don't write feature code yourself.
 
-## The team (subagents in `.Codex/agents/`)
+## The team (subagents in `.codex/agents/`)
 1. **solution-architect** — SENIOR. Discovery → proposes/agrees the stack → generates the stack profile → onboards the team → confirms readiness.
 2. **product-owner** — idea → PRD + user stories + acceptance criteria (`.nagents/prd.md`)
 3. **scrum-master** — PRD → backlog + task files (`.nagents/backlog.md`, `.nagents/tasks/`)
@@ -10,7 +10,7 @@
 5. **code-reviewer** — reviews the diff against stack profile + generic skills (`.nagents/review.md`)
 6. **qa-engineer** — verifies against acceptance criteria (`.nagents/qa-report.md`)
 
-## Skills (in `.Codex/skills/`)
+## Skills (canonical pack in `.claude/skills/`)
 - **team-memory** — the shared-memory + conflict-avoidance protocol. EVERY agent follows it.
 - **stack-profile** — the *chosen stack's* conventions. Generated per project by the architect. Empty until a stack is agreed. Loaded first by developer + reviewer; it wins over generic examples.
 - Generic quality bar: **solid-principles · design-patterns · atomic-design · component-structure · coding-standards**.
@@ -30,7 +30,7 @@ IDEA
  └─▶ solution-architect: PROPOSE STACK (2 options + rec) → .nagents/stack-decision.md
         └─▶ USER: accept / pick alternative / bring own stack   ⟵ human decision point
  └─▶ solution-architect: GENERATE STACK PROFILE (research best practices)
-        → .Codex/skills/stack-profile/{SKILL.md, references/*.md}
+        → .claude/skills/stack-profile/{SKILL.md, references/*.md}
  └─▶ solution-architect: ONBOARD + READINESS CHECK   → .nagents/readiness.md
         └─ only proceed when READY
  └─▶ product-owner: PRD  → scrum-master: BACKLOG
@@ -43,7 +43,7 @@ IDEA
 ## How you orchestrate
 1. **New idea →** delegate to **solution-architect** for discovery. It (with the PO) asks the user the platform + constraint questions and writes `.nagents/discovery.md`.
 2. **Stack →** architect writes `.nagents/stack-decision.md` with options + a recommendation, then **you present it to the user and wait**. The user accepts, picks the alternative, or supplies their own stack.
-3. **Training →** architect researches and fills `.Codex/skills/stack-profile/` for the agreed stack, then writes `.nagents/readiness.md`. Do not start building until readiness is **READY**.
+3. **Training →** architect researches and fills `.claude/skills/stack-profile/` for the agreed stack, then writes `.nagents/readiness.md`. Do not start building until readiness is **READY**.
 4. **Product & plan →** delegate to **product-owner** (PRD), then **scrum-master** (backlog + tasks).
 5. **Build loop →** for each task in `.nagents/backlog.md`: **developer** → **code-reviewer** (CHANGES REQUESTED loops back to developer) → **qa-engineer** (FAIL loops back to developer) → mark Done.
 
@@ -52,7 +52,7 @@ IDEA
 - Don't start implementation before the stack profile exists and readiness is green — that's what "the team gets familiar" means here.
 - Respect role boundaries: architect owns *system/stack*, PO owns *what*, developer owns *task-level how*, reviewer/QA gate quality.
 - `.nagents/` is the single source of truth. Copy templates from `.nagents/templates/` for new artifacts.
-- For a hands-off run, use the workflow `.Codex/workflows/nagents-pipeline.js`.
+- For a hands-off run outside Claude Code, use `node orchestrator/run.mjs`. For Claude Code, use the workflow `.claude/workflows/nagents-pipeline.js`.
 
 ## Reusing across products
-Every new product re-runs discovery → stack → profile, so the *same* six agents adapt to any stack. To reuse in another repo, copy `.Codex/` in, or package as a plugin. The `stack-profile` skill is regenerated per project — that's the adaptation mechanism.
+Every new product re-runs discovery → stack → profile, so the *same* six agents adapt to any stack. To reuse in another repo, copy `.claude/`, `.codex/`, and `.nagents/templates/` as needed, or package as a plugin. The `stack-profile` skill is regenerated per project — that's the adaptation mechanism.

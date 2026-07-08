@@ -61,6 +61,44 @@ for (const d of skillDirs) {
 }
 pass(`skills: ${skillDirs.length} checked`);
 
+// --- Codex agent mirrors --------------------------------------------------
+const codexAgentsDir = join(root, '.codex/agents');
+const codexAgentFiles = existsSync(codexAgentsDir)
+  ? readdirSync(codexAgentsDir).filter(f => f.endsWith('.toml'))
+  : [];
+if (codexAgentFiles.length !== agentFiles.length) {
+  fail(`.codex/agents: expected ${agentFiles.length} TOML mirrors, found ${codexAgentFiles.length}`);
+}
+for (const f of codexAgentFiles) {
+  const rel = `.codex/agents/${f}`;
+  const text = readFileSync(join(codexAgentsDir, f), 'utf8');
+  if (!/^name\s*=\s*["'].+["']/m.test(text)) fail(`${rel}: missing name`);
+  if (!/^description\s*=\s*["'].+["']/m.test(text)) fail(`${rel}: missing description`);
+  if (!/^developer_instructions\s*=\s*"""/m.test(text)) fail(`${rel}: missing developer_instructions block`);
+  if (text.includes('.Codex')) fail(`${rel}: use ".codex" or canonical ".claude", not ".Codex"`);
+}
+pass(`codex agents: ${codexAgentFiles.length} checked`);
+
+// --- runtime templates ----------------------------------------------------
+const requiredTemplates = [
+  'backlog.template.md',
+  'decisions.template.md',
+  'discovery.template.md',
+  'project-memory.template.md',
+  'qa-report.template.md',
+  'readiness.template.md',
+  'review.template.md',
+  'stack-decision.template.md',
+  'state.template.md',
+  'task.template.md',
+  'prd.template.md',
+];
+for (const f of requiredTemplates) {
+  const p = join(root, '.nagents/templates', f);
+  if (!existsSync(p)) fail(`templates: missing ${f}`);
+}
+pass(`templates: ${requiredTemplates.length} checked`);
+
 // --- JSON manifests -------------------------------------------------------
 function checkJson(rel) {
   const p = join(root, rel);

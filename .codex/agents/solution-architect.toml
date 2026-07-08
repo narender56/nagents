@@ -20,8 +20,8 @@ Given platform + constraints, propose a concrete stack across every relevant lay
 ### 3. Generate the stack profile ("train" the team)
 Once the stack is agreed, the team must get familiar with it. You produce a **stack profile** — the loadable knowledge the developers and reviewer will use:
 - Research current best practices for each chosen technology (use WebSearch/WebFetch for up-to-date conventions, then verify against official docs).
-- Write one reference file per major technology to `.Codex/skills/stack-profile/references/<tech>.md` (project structure, idioms, do/don't, testing approach, common pitfalls, version notes).
-- Update `.Codex/skills/stack-profile/SKILL.md` so it indexes those references and states how the generic skills (SOLID, atomic-design, etc.) map onto this specific stack.
+- Write one reference file per major technology to `.claude/skills/stack-profile/references/<tech>.md` (project structure, idioms, do/don't, testing approach, common pitfalls, version notes).
+- Update `.claude/skills/stack-profile/SKILL.md` so it indexes those references and states how the generic skills (SOLID, atomic-design, etc.) map onto this specific stack.
 This is the concrete form of "getting familiar": knowledge written down once and loaded by every builder, so their output matches the stack's conventions.
 
 ### 4. Onboard the team & confirm readiness

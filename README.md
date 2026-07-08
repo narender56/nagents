@@ -121,7 +121,7 @@ The architect runs discovery, proposes a stack, and **waits for your call**. App
 
 > "Run the nagents-pipeline workflow with args: `{ idea: 'habit-tracking app', platform: 'cross-platform mobile', stack: 'Flutter + Firebase' }`"
 
-### Option C — Any agent CLI (Codex, Gemini, Aider, …) via the tool-agnostic orchestrator
+### Option B — Any agent CLI (Codex, Gemini, Aider, …) via the tool-agnostic orchestrator
 
 nagents isn't Claude-only. The roles, skills, and memory are plain files, so a small Node runner drives the whole pipeline against **any** coding-agent CLI:
 
@@ -133,7 +133,7 @@ node orchestrator/run.mjs --engine claude --idea "..." --stack "Flutter + Fireba
 
 It inlines the skills into each prompt (non-Claude tools can't auto-load them), runs every role sequentially (no file conflicts), and enforces the review/QA gates. Most other tools are single-agent — this runner _is_ the orchestration they lack. See [`orchestrator/README.md`](orchestrator/README.md).
 
-### Option B — Install as a Claude Code plugin
+### Option C — Install as a Claude Code plugin
 
 From inside any project's Claude Code session:
 
@@ -152,6 +152,8 @@ nagents/
 │   ├── agents/        6 role agents
 │   ├── skills/        team-memory + stack-profile (generated) + 5 generic skills
 │   └── workflows/     nagents-pipeline.js  (automated end-to-end run)
+├── .codex/
+│   └── agents/        Codex-compatible mirrors of the role agents
 ├── orchestrator/      tool-agnostic runner: run.mjs + engines.json (Codex, Gemini, Aider, Claude)
 ├── .claude-plugin/
 │   ├── plugin.json        plugin manifest (points at .claude/)
@@ -169,14 +171,21 @@ nagents/
 node scripts/validate.mjs
 ```
 
-Checks that every agent and skill has valid front-matter, the plugin/marketplace JSON parses, and the workflow is syntactically valid. CI runs this on every PR.
+Checks agents, skills, Codex mirrors, runtime templates, plugin manifests, workflow syntax, and orchestrator engine config. CI runs this on every PR.
 
-## Roadmap
+## Status & roadmap
 
-- [x] Ship artifact templates _with_ the plugin so plugin-only installs get full orchestration
-- [x] Ready-made stack profiles for popular stacks (React, Angular/NestJS, Flutter, Go)
-- [x] A `/nagents` slash command to kick off the flow
-- [x] Example runs checked into `examples/`
+**Shipped in this alpha:**
+- [x] Six role agents for Claude Code, plus Codex-compatible agent mirrors
+- [x] Shared artifact templates in `.nagents/templates/`
+- [x] Tool-agnostic Node orchestrator for Claude, Codex, Gemini, Aider, and echo dry runs
+- [x] Structural validation for agents, skills, manifests, workflow, templates, and engine config
+
+**Next up:**
+- [ ] Package artifact templates with the plugin so plugin-only installs get the full orchestration surface
+- [ ] Ready-made starter stack profiles for popular stacks (React, Angular/NestJS, Flutter, Go)
+- [ ] A `/nagents` slash command to kick off the flow
+- [ ] Example runs checked into `examples/`
 
 See [CHANGELOG.md](CHANGELOG.md) for what's shipped.
 
