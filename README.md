@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🤖 nagents
+# 🤖 nAgents
 
 **A self-adapting software-engineering team for [Claude Code](https://claude.com/claude-code) — and any other agent CLI (Codex, Gemini, Aider).**
 
@@ -17,7 +17,7 @@ Architect → Product Owner → Scrum Master → Developer → Code Reviewer →
 
 ## What is this?
 
-Most "AI dev team" setups hardcode a stack and a fixed pipeline. **nagents doesn't.** You describe an idea; a senior **Solution Architect** asks what you're building (mobile? web? desktop?), proposes a tech stack, and — once you agree — **researches that stack's best practices and writes them into a skill the whole team loads before coding.** Then the classic loop runs: PRD → backlog → implement → review → QA, with rework loops at every gate.
+Most "AI dev team" setups hardcode a stack and a fixed pipeline. **nAgents doesn't.** You describe an idea; a senior **Solution Architect** asks what you're building (mobile? web? desktop?), proposes a tech stack, and — once you agree — **researches that stack's best practices and writes them into a skill the whole team loads before coding.** Then the classic loop runs: PRD → backlog → implement → review → QA, with rework loops at every gate.
 
 It's built from two clean primitives, kept deliberately separate:
 
@@ -63,7 +63,7 @@ IDEA
 
 ## Shared memory & no conflicts
 
-Subagents each run in their own context — **the only thing they share is the filesystem.** nagents turns that into a real team memory and a coordination discipline (the **team-memory** skill), so the agents stay consistent and never clobber each other's work.
+Subagents each run in their own context — **the only thing they share is the filesystem.** nAgents turns that into a real team memory and a coordination discipline (the **team-memory** skill), so the agents stay consistent and never clobber each other's work.
 
 **Common memory** lives in [`.nagents/memory/`](.nagents/memory):
 
@@ -99,7 +99,7 @@ claude            # open Claude Code in the repo
 
 Then just describe an idea:
 
-> "I want to build a habit-tracking app. Kick off nagents."
+> "I want to build a habit-tracking app. Kick off nAgents."
 
 The architect runs discovery, proposes a stack, and **waits for your call**. Approve it or hand it your own stack; it generates the stack profile, confirms readiness, then the PO → SM → dev → review → QA loop runs. Inspect every artifact in [`.nagents/`](.nagents/README.md) between stages, or drive a single role directly: _"Have the code-reviewer look at TASK-002."_
 
@@ -109,7 +109,7 @@ The architect runs discovery, proposes a stack, and **waits for your call**. App
 
 ### Option B — Any agent CLI (Codex, Gemini, Aider, …) via the tool-agnostic orchestrator
 
-nagents isn't Claude-only. The roles, skills, and memory are plain files, so a small Node runner drives the whole pipeline against **any** coding-agent CLI:
+nAgents isn't Claude-only. The roles, skills, and memory are plain files, so a small Node runner drives the whole pipeline against **any** coding-agent CLI:
 
 ```bash
 node orchestrator/run.mjs --engine codex  --idea "a habit-tracking app" --platform mobile
@@ -162,12 +162,14 @@ Checks agents, skills, Codex mirrors, runtime templates, plugin manifests, workf
 ## Status & roadmap
 
 **Shipped in this alpha:**
+
 - [x] Six role agents for Claude Code, plus Codex-compatible agent mirrors
 - [x] Shared artifact templates in `.nagents/templates/`
 - [x] Tool-agnostic Node orchestrator for Claude, Codex, Gemini, Aider, and echo dry runs
 - [x] Structural validation for agents, skills, manifests, workflow, templates, and engine config
 
 **Next up:**
+
 - [ ] Package artifact templates with the plugin so plugin-only installs get the full orchestration surface
 - [ ] Ready-made starter stack profiles for popular stacks (React, Angular/NestJS, Flutter, Go)
 - [ ] A `/nagents` slash command to kick off the flow
